@@ -1,0 +1,2 @@
+# ocshot
+Owncloud Screenshot Uploader
