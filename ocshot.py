@@ -12,9 +12,9 @@ from clients.oc import OcClient
 parser = ArgumentParser()
 parser.add_argument("--confdir", help="configuration directory",
                     default="")
-parser.add_argument("--mode", help="operation mode",
-                    type=str, default="screenshot",
-                    choices=["screenshot", "screenshot_region"])
+parser.add_argument("--mode", help="operation mode. pass 'help' for "
+                    + "details.", type=str, default="screenshot",
+                    choices=["help", "screenshot", "screenshot_region"])
 args = parser.parse_args()
 
 # take default config dir if none given
