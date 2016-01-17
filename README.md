@@ -1,2 +1,7 @@
 # ocshot
-Owncloud Screenshot Uploader
+Owncloud Screnshot Uploader
+
+## Dependencies
+
+* pyocclient
+* pyscreenshot
