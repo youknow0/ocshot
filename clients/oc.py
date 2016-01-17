@@ -44,9 +44,16 @@ class OcClient(object):
     def _remote_dir_exists(self, path):
         oc = self._get_oc()
 
-        fileinfo = oc.file_info(path)
-        if fileinfo == None:
-            return False
+        try:
+            fileinfo = oc.file_info(path)
+
+        except owncloud.ResponseError as e:
+            # the owncloud library throws a HTTPError 404 if the file 
+            # does not exists. we must handle this case here.
+            if e.status_code == 404:
+                return False
+            else:
+                raise e
         
         return fileinfo.is_dir()
 
