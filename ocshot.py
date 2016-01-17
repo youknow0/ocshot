@@ -38,9 +38,10 @@ try:
     mode.prepare()
     filepath = mode.get_filepath()
     print (oc.share(filepath))
-except Exception as e:
+except:
     print ("Error!")
     traceback.print_exc()
+    sys.exit(1)
 else:
     mode.cleanup()
 
