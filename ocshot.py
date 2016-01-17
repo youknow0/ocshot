@@ -43,7 +43,7 @@ except:
     print ("Error!")
     traceback.print_exc()
     exitcode = 1
-else:
-    mode.cleanup()
+
+mode.cleanup()
 
 sys.exit(exitcode)
