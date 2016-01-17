@@ -33,6 +33,7 @@ except OSError as e:
 
 oc = OcClient(myconf.conf)
 
+exitcode = 0
 mode = modes.base.factory(args.mode, None)
 try:
     mode.prepare()
@@ -41,7 +42,8 @@ try:
 except:
     print ("Error!")
     traceback.print_exc()
-    sys.exit(1)
+    exitcode = 1
 else:
     mode.cleanup()
 
+sys.exit(exitcode)
