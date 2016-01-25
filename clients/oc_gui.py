@@ -20,9 +20,9 @@ class GuiApp(wx.App):
     def OnInit(self):
         self.Connect(-1, -1, EVT_RESULT_ID, self.OnResult)
 
-        self._frame = wx.Frame(None, -1, 'simple.py')
-        self._frame.Show()
-        self.SetTopWindow(self._frame)
+        #self._frame = wx.Frame(None, -1, 'simple.py')
+        #self._frame.Show()
+        #self.SetTopWindow(self._frame)
 
         pd_style = wx.PD_SMOOTH
         self._dialog = wx.ProgressDialog(title="Uploading...",
@@ -38,7 +38,7 @@ class GuiApp(wx.App):
         if not event.data is None:
             if event.data == self._filesz:
                 self._dialog.Destroy()
-                self._frame.Close()
+                #self._frame.Close()
                 self.ExitMainLoop()
                 wx.WakeUpMainThread()
             else:
