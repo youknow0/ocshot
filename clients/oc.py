@@ -1,3 +1,4 @@
+from __future__ import print_function
 import owncloud
 import os
 import string
@@ -68,20 +69,35 @@ class OcClient(object):
 
         return randstr + ext
 
-        
-    def share(self, filepath):
-        oc = self._get_oc()
+    def _open_file_to_upload(self, filepath):
+        filehandle = open(filepath, 'rb')
 
-        orig_filename = os.path.basename(filepath)
-
+        return filehandle
+    
+    def _check_remote_destdir_existant(self):
         if not self._remote_dir_exists(self._path):
             if not oc.mkdir(self._path):
                 raise OcError("Could not create the given remote " + 
                               "directory '%s'" % (self._path,))
 
+    def _get_remote_path(self, filepath):
+        orig_filename = os.path.basename(filepath)
+
         remote_name = self._generate_filename(orig_filename)
-        remote_path = self._path + remote_name
-        if not oc.put_file(remote_path, filepath):
+        return self._path + remote_name
+
+    def share(self, filepath):
+        filehandle = self._open_file_to_upload(filepath)
+
+        return self._share(filehandle, filepath)
+
+    def _share(self, filehandle, filepath):
+        oc = self._get_oc()
+        self._check_remote_destdir_existant()
+
+        remote_path = self._get_remote_path(filepath)
+
+        if not oc.put_file_contents(remote_path, filehandle):
             raise OcError("Uploading failed")
 
         link_info = oc.share_file_with_link(remote_path)

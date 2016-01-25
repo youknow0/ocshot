@@ -7,7 +7,7 @@ import sys
 import os
 import modes.base
 from argparse import ArgumentParser
-from clients.oc import OcClient
+from clients.ocwrap import get_occlient
 
 parser = ArgumentParser()
 parser.add_argument("--confdir", help="configuration directory",
@@ -15,6 +15,8 @@ parser.add_argument("--confdir", help="configuration directory",
 parser.add_argument("--mode", help="operation mode. pass 'help' for "
                     + "details.", type=str, default="screenshot",
                     choices=["help", "screenshot", "screenshot_region"])
+parser.add_argument("--no-gui", help="do not show any GUI",
+                    action="store_true", dest="no_gui")
 args = parser.parse_args()
 
 # take default config dir if none given
@@ -31,7 +33,7 @@ except OSError as e:
     print ("Could not read the configuration from the " +
            "directory '%s': %s" % (confdir, str(e)))
 
-oc = OcClient(myconf.conf)
+oc = get_occlient(args.no_gui, myconf.conf)
 
 exitcode = 0
 mode = modes.base.factory(args.mode, None)
