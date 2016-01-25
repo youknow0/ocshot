@@ -1,7 +1,6 @@
 from __future__ import print_function
 import wx
 import os
-import time
 from threading import Thread
 
 EVT_RESULT_ID = wx.NewId()
@@ -15,7 +14,12 @@ class ResultEvent(wx.PyEvent):
 class GuiApp(wx.App):
     def __init__(self, filesz):
         self._filesz = filesz
+        self._previous_bytes = 0
+
         wx.App.__init__(self)
+
+    def updateProgress(self, event):
+        self._dialog.UpdatePulse()
 
     def OnInit(self):
         self.Connect(-1, -1, EVT_RESULT_ID, self.OnResult)
@@ -28,22 +32,37 @@ class GuiApp(wx.App):
         self._dialog = wx.ProgressDialog(title="Uploading...",
                                          message="Uploading screenshot...",
                                          style=pd_style)
-        self._dialog.Pulse(newmsg="Preparing...")
+        self._dialog.UpdatePulse(newmsg="Preparing...")
         self._dialog.SetFocus()
 
+        self._timer = wx.Timer()
+        self.Bind(wx.EVT_TIMER, self.updateProgress, self._timer)
+        self._timer.Start(50)
 
         return True
     
     def OnResult(self, event):
         if not event.data is None:
             if event.data == self._filesz:
+                self._dialog.UpdatePulse(newmsg="Sharing...")
+                self._timer.Start(50)
+            elif event.data == "finished":
                 self._dialog.Destroy()
                 #self._frame.Close()
                 self.ExitMainLoop()
                 wx.WakeUpMainThread()
             else:
-                value = (event.data / self._filesz) * 100
-                self._dialog.Update(value=value)
+                self._timer.Stop()
+                bytes_sent = event.data
+                value = (float(bytes_sent) / self._filesz) * 100.0
+                if (bytes_sent - self._previous_bytes) >= 256:
+                    msg = ("Uploading (%d %%, %d/%d)" % (value,
+                                                         bytes_sent,
+                                                         self._filesz))
+                    self._dialog.Update(value=value, newmsg=msg)
+                    self._previous_bytes = bytes_sent
+                else:
+                    self._dialog.Update(value=value)
 
 class AppThread(Thread):
     def __init__(self, app):
@@ -59,7 +78,7 @@ class FileReadDecorator(object):
         self._read_callback = read_callback
 
     def read(self, size = -1):
-        data = self._decoratee.read(size)
+        data = self._decoratee.read(10)
         self._read_callback(data)
 
         return data
@@ -77,19 +96,18 @@ class OcClientGuiDecorator(object):
 
     def share(self, filepath):
         filehandle = self._open_file_to_upload(filepath)
-        filepath = filepath
         filesz = os.path.getsize(filepath)
 
         self._app = GuiApp(filesz)
         thread = AppThread(self._app)
         thread.start()
 
-        return self._share(filehandle, filepath)
+        result = self._share(filehandle, filepath)
+        wx.PostEvent(self._app, ResultEvent("finished"))
+        return result
 
     def _open_file_to_upload(self, filepath):
-        print ("upload!")
         self._progress = 0
-
         filehandle = open(filepath, 'rb')
 
         read_callback = self._read_progress

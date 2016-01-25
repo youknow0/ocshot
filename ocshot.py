@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from __future__ import print_function
 import config
 import traceback
 import sys
@@ -30,8 +29,7 @@ try:
     myconf = config.Config(confdir)
     myconf.read()
 except OSError as e:
-    print ("Could not read the configuration from the " +
-           "directory '%s': %s" % (confdir, str(e)))
+    print "Could not read the configuration from the directory '%s': %s" % (confdir, str(e))
 
 oc = get_occlient(args.no_gui, myconf.conf)
 
@@ -40,9 +38,9 @@ mode = modes.base.factory(args.mode, None)
 try:
     mode.prepare()
     filepath = mode.get_filepath()
-    print (oc.share(filepath))
+    print oc.share(filepath)
 except:
-    print ("Error!")
+    print "Error!"
     traceback.print_exc()
     exitcode = 1
 
