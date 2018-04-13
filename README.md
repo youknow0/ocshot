@@ -1,5 +1,5 @@
 # ocshot
-Owncloud Screnshot Uploader
+Owncloud Screenshot Uploader
 
 ## Dependencies
 
